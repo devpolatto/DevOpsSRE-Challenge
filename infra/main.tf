@@ -125,6 +125,80 @@ module "ecr" {
   }
 }
 
+resource "aws_iam_role_policy" "ecs_deploy" {
+  name = "${local.aws_prefix_name}-GitHubActions-ECS-Deploy"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:CompleteLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:InitiateLayerUpload",
+          "ecr:BatchDeleteImage",
+          "ecr:PutImage",
+          "ecr:BatchCheckLayerAvailability"
+        ]
+        Resource = module.ecr.repository.repository_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:UpdateService"
+        ]
+        Resource = "arn:aws:ecs:*:${data.aws_caller_identity.current.account_id}:service/${local.aws_prefix_name}-cluster/${local.aws_prefix_name}-service"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "ecs:cluster" = "arn:aws:ecs:*:${data.aws_caller_identity.current.account_id}:cluster/${local.aws_prefix_name}-cluster"
+          }
+        }
+      }
+    ]
+  })
+}
+
+module "rds_aurora" {
+  source = "./modules/aurora"
+
+  aurora = {
+    name = "prodaurora"
+  }
+  write_cluster_instence = {
+    enabled = true
+  }
+  reader_cluster_instence = {
+    enabled = false
+  }
+  secret = {
+    secret_name = "${local.aws_prefix_name}-aurora-secret"
+  }
+  network = {
+    vpc_security_group_ids = [aws_security_group.aurora.id]
+    db_subnet_group_name   = aws_db_subnet_group.this.name
+  }
+  tags = {
+    Environment = var.environment
+  }
+}
+
 resource "github_actions_secret" "secrets" {
   for_each        = local.github_actions_secrets
   repository      = var.github_connection.repo_name
