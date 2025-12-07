@@ -100,6 +100,18 @@ data "aws_iam_policy_document" "deploy" {
   }
 }
 
+module "vpc" {
+  source = "./modules/vpc"
+
+  vpc = {
+    name       = "${local.aws_prefix_name}-vpc"
+    cidr_block = var.vpc.cidr_block
+  }
+  tags = {
+    Environment = var.environment
+  }
+}
+
 resource "github_actions_secret" "secrets" {
   for_each        = local.github_actions_secrets
   repository      = var.github_connection.repo_name
