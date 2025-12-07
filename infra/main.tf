@@ -45,7 +45,10 @@ data "aws_iam_policy_document" "github_assume" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_connection.repo_name}:ref:refs/heads/master"]
+      values = [
+        "repo:${var.github_connection.owner}/${var.github_connection.repo_name}:ref:refs/heads/master",
+        "repo:${var.github_connection.owner}/${var.github_connection.repo_name}:ref:refs/heads/main"
+      ]
     }
   }
 }

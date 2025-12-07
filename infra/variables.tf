@@ -36,6 +36,7 @@ variable "github_connection" {
     client_id_list  = list(string)
     thumbprint_list = list(string)
     repo_name       = string
+    owner           = string
   })
 }
 
