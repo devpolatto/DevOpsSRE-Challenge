@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "./fetchusers"
+        shell: bash
+        working-directory: ./fetchusers
     permissions:
       contents: read
       id-token: write
