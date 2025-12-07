@@ -112,6 +112,19 @@ module "vpc" {
   }
 }
 
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository = {
+    name                 = "${lower(replace(local.aws_prefix_name, "-", ""))}repository"
+    image_tag_mutability = "IMMUTABLE"
+    scan_on_push         = true
+  }
+  tags = {
+    Environment = var.environment
+  }
+}
+
 resource "github_actions_secret" "secrets" {
   for_each        = local.github_actions_secrets
   repository      = var.github_connection.repo_name

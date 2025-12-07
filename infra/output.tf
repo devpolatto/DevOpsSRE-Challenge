@@ -25,3 +25,7 @@ output "public_route_table_ids" {
 output "private_route_table_ids" {
   value = module.vpc.private_route_table_ids
 }
+
+output "ecr_repository" {
+  value = module.ecr.repository
+}
