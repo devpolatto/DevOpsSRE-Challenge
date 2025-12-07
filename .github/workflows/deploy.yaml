@@ -7,10 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./fetchusers
     permissions:
       contents: read
       id-token: write
@@ -24,11 +20,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: fetchusers/package-lock.json
 
       - name: Install & Build
         run: |
           npm ci
           npm run build
+        working-directory: ./fetchusers
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -39,6 +37,7 @@ jobs:
       - name: Sync to S3
         run: |
           aws s3 sync ./build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete --cache-control "public, max-age=31536000, immutable"
+        working-directory: ./fetchusers
 
       - name: Invalidate CloudFront Cache
         run: |
