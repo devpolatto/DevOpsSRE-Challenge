@@ -6,7 +6,6 @@ module "s3_website" {
     versioning_enabled     = true
     sse_encryption_enabled = true
     cloudfront_enabled     = false
-    # cloudfront_distribution_arn = data.aws_cloudfront_distribution.this.arn
   }
 }
 
@@ -14,10 +13,35 @@ module "s3_cloudfront" {
   source = "./modules/s3_cloudfront"
 
   config = {
-    s3_bucket_domain_name = module.s3_website.s3_bucket_website.regional_domain_name
+    s3_bucket_domain_name = module.s3_website.s3_bucket_website.bucket_domain_name
     s3_bucket_id          = module.s3_website.s3_bucket_website.bucket_id
     depends_on            = [module.s3_website]
   }
+}
+
+resource "aws_s3_bucket_policy" "oac_policy" {
+  bucket = module.s3_website.s3_bucket_website.bucket_name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action = [
+          "s3:GetObject"
+        ]
+        Resource = "arn:aws:s3:::${module.s3_website.s3_bucket_website.bucket_name}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = module.s3_cloudfront.cloudfront.arn
+          }
+        }
+      }
+    ]
+  })
+  depends_on = [module.s3_website, module.s3_cloudfront]
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
