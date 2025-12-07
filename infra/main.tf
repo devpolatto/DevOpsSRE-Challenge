@@ -6,6 +6,7 @@ module "s3_website" {
     versioning_enabled     = true
     sse_encryption_enabled = true
     cloudfront_enabled     = false
+    # cloudfront_distribution_arn = data.aws_cloudfront_distribution.this.arn
   }
 }
 
@@ -15,6 +16,7 @@ module "s3_cloudfront" {
   config = {
     s3_bucket_domain_name = module.s3_website.s3_bucket_website.regional_domain_name
     s3_bucket_id          = module.s3_website.s3_bucket_website.bucket_id
+    depends_on            = [module.s3_website]
   }
 }
 

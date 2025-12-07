@@ -5,6 +5,6 @@ output "s3_bucket_website" {
     bucket_id            = aws_s3_bucket.this.id
     regional_domain_name = aws_s3_bucket.this.bucket_regional_domain_name
     website_endpoint     = aws_s3_bucket_website_configuration.this.website_endpoint
-    oia_policy           = aws_s3_bucket_policy.oai.policy
+    # oac_policy           = aws_s3_bucket_policy.cloudfront_oac.policy
   }
 }

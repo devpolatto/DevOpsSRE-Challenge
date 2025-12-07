@@ -1,3 +1,11 @@
+resource "aws_cloudfront_origin_access_control" "this" {
+  name                              = "oac-s3-${var.config.s3_bucket_domain_name}"
+  description                       = "OAC para frontend estático"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 resource "aws_cloudfront_distribution" "this" {
   enabled             = var.config.enabled
   is_ipv6_enabled     = var.config.is_ipv6_enabled
@@ -5,12 +13,13 @@ resource "aws_cloudfront_distribution" "this" {
   aliases             = var.config.aliases
 
   origin {
-    domain_name = var.config.s3_bucket_domain_name
-    origin_id   = "S3-${var.config.s3_bucket_id}"
+    domain_name              = var.config.s3_bucket_domain_name
+    origin_id                = "S3-${var.config.s3_bucket_id}"
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
 
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.this.cloudfront_access_identity_path
-    }
+    # s3_origin_config {
+    #   origin_access_identity = aws_cloudfront_origin_access_identity.this.cloudfront_access_identity_path
+    # }
   }
 
   default_cache_behavior {

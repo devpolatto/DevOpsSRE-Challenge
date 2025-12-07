@@ -24,26 +24,53 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 # OAI para CloudFront acessar o bucket
-resource "aws_s3_bucket_policy" "oai" {
-  bucket = aws_s3_bucket.this.id
-  policy = data.aws_iam_policy_document.oai.json
-}
+# resource "aws_s3_bucket_policy" "oai" {
+#   bucket = aws_s3_bucket.this.id
+#   policy = data.aws_iam_policy_document.oai.json
+# }
 
-data "aws_iam_policy_document" "oai" {
-  statement {
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.this.arn}/*"]
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [var.s3_bucket.cloudfront_distribution_arn]
-    }
-  }
-}
+# data "aws_iam_policy_document" "oai" {
+#   statement {
+#     principals {
+#       type        = "Service"
+#       identifiers = ["cloudfront.amazonaws.com"]
+#     }
+#     actions   = ["s3:GetObject"]
+#     resources = ["${aws_s3_bucket.this.arn}/*"]
+#     condition {
+#       test     = "StringEquals"
+#       variable = "AWS:SourceArn"
+#       values   = [var.s3_bucket.cloudfront_distribution_arn]
+#     }
+#   }
+# }
+
+
+# resource "aws_s3_bucket_policy" "cloudfront_oac" {
+#   bucket = aws_s3_bucket.this.id
+#   policy = data.aws_iam_policy_document.cloudfront_oac.json
+# }
+
+# data "aws_iam_policy_document" "cloudfront_oac" {
+#   statement {
+#     sid    = "AllowCloudFrontOAC"
+#     effect = "Allow"
+
+#     principals {
+#       type        = "Service"
+#       identifiers = ["cloudfront.amazonaws.com"]
+#     }
+
+#     actions   = ["s3:GetObject"]
+#     resources = ["${aws_s3_bucket.this.arn}/*"]
+
+#     condition {
+#       test     = "StringEquals"
+#       variable = "AWS:SourceArn"
+#       values   = [var.s3_bucket.cloudfront_distribution_arn]
+#     }
+#   }
+# }
 
 # Block public access
 resource "aws_s3_bucket_public_access_block" "this" {
