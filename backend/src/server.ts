@@ -14,8 +14,8 @@ app.get('/health', async (_req: Request, res: Response) => {
   } catch {
     res.status(500).json({ status: 'error', database: 'disconnected' });
   }
-});1
-
+});
+// pipeline teste
 app.get('/api/users', async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Math.min(Number(req.query.limit) || 20, 100);
