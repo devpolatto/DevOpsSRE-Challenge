@@ -14,6 +14,29 @@ resource "aws_secretsmanager_secret_version" "master" {
   secret_string = random_password.master.result
 }
 
+resource "aws_secretsmanager_secret" "db_connection" {
+  name                    = "${var.aurora.name}-aurora-connection-string"
+  description             = "String de conexão do Aurora Serverless"
+  recovery_window_in_days = 0
+
+  tags = {
+    Name = "${var.aurora.name}-aurora-connection-string"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "db_connection" {
+  secret_id = aws_secretsmanager_secret.db_connection.id
+  secret_string = jsonencode({
+    username             = var.aurora.master_username
+    password             = random_password.master.result
+    host                 = aws_rds_cluster.this.endpoint
+    port                 = 5432
+    dbname               = var.aurora.database_name
+    dbInstanceIdentifier = aws_rds_cluster.this.cluster_identifier
+    connectionString     = "postgresql://${var.aurora.master_username}:${random_password.master.result}@${aws_rds_cluster.this.endpoint}:5432/${var.aurora.database_name}"
+  })
+}
+
 resource "aws_rds_cluster" "this" {
   cluster_identifier  = var.aurora.name
   engine              = var.aurora.engine
