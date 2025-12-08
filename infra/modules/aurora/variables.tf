@@ -41,12 +41,6 @@ variable "secret" {
   })
 }
 
-# variable "security_group" {
-#   type = object({
-#     vpc_id = string
-#   })
-# }
-
 variable "tags" {
   type = map(string)
 }

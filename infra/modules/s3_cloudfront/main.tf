@@ -13,7 +13,7 @@ resource "aws_cloudfront_distribution" "this" {
   aliases             = var.config.aliases
 
   origin {
-    domain_name              = var.config.s3_bucket_domain_name # REST endpoint (correto)
+    domain_name              = var.config.s3_bucket_domain_name
     origin_id                = "S3-${var.config.s3_bucket_id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.this.id
   }
@@ -49,6 +49,3 @@ resource "aws_cloudfront_distribution" "this" {
 
   tags = var.config.tags
 }
-
-# 🚫 REMOVER — NÃO USAR OAI QUANDO OAC ESTÁ HABILITADO
-# resource "aws_cloudfront_origin_access_identity" "this" {}

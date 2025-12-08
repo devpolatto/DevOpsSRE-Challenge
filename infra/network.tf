@@ -8,7 +8,7 @@ resource "aws_security_group" "aurora" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.fargate.id] # passar do ECS depois
+    security_groups = [aws_security_group.fargate.id]
   }
 
   egress {
@@ -85,11 +85,10 @@ resource "aws_lb_listener" "https" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  # certificate_arn   = var.certificate_arn  # ACM certificate (us-east-1)
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn # vamos passar do ECS
+    target_group_arn = aws_lb_target_group.this.arn
   }
 }
 
@@ -123,7 +122,6 @@ resource "aws_wafv2_web_acl" "this" {
     sampled_requests_enabled   = true
   }
 
-  # 2. Rate Limit – 2000 req/5min por IP (protege contra brute force)
   rule {
     name     = "RateLimit2000"
     priority = 20

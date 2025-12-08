@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use(express.json({ limit: '10mb' }));
 
-// Healthcheck que fintechs AMAM
 app.get('/health', async (_req: Request, res: Response) => {
   try {
     await prisma.$queryRaw`SELECT 1`;

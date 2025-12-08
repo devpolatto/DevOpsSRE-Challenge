@@ -16,8 +16,8 @@ variable "s3_bucket" {
     sse_encryption_enabled      = optional(bool, true)
     cloudfront_enabled          = optional(bool, false)
     cloudfront_distribution_arn = optional(string, "")
-    index_document              = optional(string, "index.html") # Added default index document
-    error_document              = optional(string, "error.html") # Added default error document
+    index_document              = optional(string, "index.html")
+    error_document              = optional(string, "error.html")
     public_access_disable       = optional(bool, true)
   })
 }
