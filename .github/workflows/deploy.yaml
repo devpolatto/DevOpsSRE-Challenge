@@ -3,6 +3,10 @@ name: Deploy React App to S3
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'fetchusers/**'
+      - '.github/workflows/deploy.yml'
+
 
 jobs:
   deploy:
