@@ -135,6 +135,16 @@ resource "aws_iam_role_policy" "ecs_deploy" {
   })
 }
 
+resource "aws_iam_role" "github_actions_ecs" {
+  name = "GitHubActions-ECS-Deploy"
+
+  assume_role_policy = data.aws_iam_policy_document.github_assume.json
+
+  tags = {
+    Purpose = "GitHub Actions OIDC para deploy ECS Fargate"
+  }
+}
+
 module "rds_aurora" {
   source = "./modules/aurora"
 

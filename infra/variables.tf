@@ -15,6 +15,10 @@ locals {
       secret_name = "AWS_ROLE_ARN"
       value       = aws_iam_role.github_actions.arn
     }
+    aws_ecs_role = {
+      secret_name = "AWS_ECS_ROLE_ARN"
+      value       = aws_iam_role.github_actions_ecs.arn
+    }
     s3_bucket = {
       secret_name = "S3_BUCKET_NAME"
       value       = module.s3_website.s3_bucket_website.bucket_id
