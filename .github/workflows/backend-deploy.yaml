@@ -36,7 +36,6 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          cd backend
           docker build -t $ECR_REGISTRY/payment-backend:$IMAGE_TAG .
           docker push $ECR_REGISTRY/payment-backend:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/payment-backend:$IMAGE_TAG" >> $GITHUB_OUTPUT
