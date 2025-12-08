@@ -5,7 +5,7 @@ on:
     branches: [ master ]
     paths:
       - 'fetchusers/**'
-      - '.github/workflows/deploy.yml'
+      - '.github/workflows/deploy.yaml'
 
 
 jobs:
