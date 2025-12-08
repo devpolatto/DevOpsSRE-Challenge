@@ -76,3 +76,13 @@ variable "aws_config" {
     region  = "us-east-1"
   }
 }
+
+variable "tags" {
+  type = map(string)
+  default = {
+    project         = "DevOpsSRE-Challenge"
+    terraform       = "true"
+    repository      = "DevOpsSRE-Challenge"
+    repository_path = "DevOpsSRE-Challenge"
+  }
+}

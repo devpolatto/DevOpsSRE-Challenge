@@ -1,3 +1,18 @@
+resource "aws_resourcegroups_group" "this" {
+  name = "${local.aws_prefix_name}-resource-group"
+  resource_query {
+    query = jsonencode({
+      ResourceTypeFilters = ["AWS::AllSupported"]
+      TagFilters = [
+        {
+          Key    = "project"
+          Values = [var.tags["project"]]
+        }
+      ]
+    })
+  }
+}
+
 module "s3_website" {
   source = "./modules/s3_website"
 
@@ -86,7 +101,7 @@ module "ecr" {
 }
 
 resource "aws_iam_role_policy" "ecs_deploy" {
-  name = "${local.aws_prefix_name}-GitHubActions-ECS-Deploy"
+  name = "GitHubActions-ECS-Deploy-Policy-v2"
   role = aws_iam_role.github_actions.id
 
   policy = jsonencode({
@@ -133,6 +148,10 @@ resource "aws_iam_role_policy" "ecs_deploy" {
       }
     ]
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_iam_role" "github_actions_ecs" {

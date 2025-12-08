@@ -30,9 +30,9 @@ terraform {
 provider "aws" {
   profile = var.aws_config.profile
   region  = var.aws_config.region
-  #   default_tags {
-  #     tags = local.common_tags
-  #   }
+  default_tags {
+    tags = var.tags
+  }
 }
 
 provider "azurerm" {
