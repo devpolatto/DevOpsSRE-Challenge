@@ -30,6 +30,12 @@ locals {
   }
 }
 
+variable "vpc" {
+  type = object({
+    cidr_block = string
+  })
+}
+
 variable "github_connection" {
   type = object({
     url             = string
