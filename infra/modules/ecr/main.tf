@@ -1,4 +1,5 @@
 resource "aws_ecr_repository" "this" {
+  count                = var.enabled_resource ? 1 : 0
   name                 = var.repository.name
   image_tag_mutability = var.repository.image_tag_mutability
   image_scanning_configuration {
@@ -18,7 +19,8 @@ resource "aws_ecr_repository" "this" {
 }
 
 resource "aws_ecr_lifecycle_policy" "this" {
-  repository = aws_ecr_repository.this.name
+  count      = var.enabled_resource ? 1 : 0
+  repository = aws_ecr_repository.this[0].name
 
   policy = jsonencode({
     rules = [

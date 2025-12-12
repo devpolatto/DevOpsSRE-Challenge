@@ -15,10 +15,6 @@ locals {
       secret_name = "AWS_ROLE_ARN"
       value       = aws_iam_role.github_actions.arn
     }
-    aws_ecs_role = {
-      secret_name = "AWS_ECS_ROLE_ARN"
-      value       = aws_iam_role.github_actions_ecs.arn
-    }
     s3_bucket = {
       secret_name = "S3_BUCKET_NAME"
       value       = module.s3_website.s3_bucket_website.bucket_id
@@ -31,7 +27,16 @@ locals {
       secret_name = "AWS_REGION"
       value       = var.aws_config.region
     }
+    # aws_ecs_role = {
+    #   secret_name = "AWS_ECS_ROLE_ARN"
+    #   value       = try(aws_iam_role.github_actions_ecs.arn, "")
+    # }
   }
+}
+
+variable "deploy_backend" {
+  type    = bool
+  default = false
 }
 
 variable "vpc" {
@@ -59,8 +64,6 @@ variable "github_owner" {
   type      = string
   sensitive = true
 }
-
-
 
 variable "environment" {
   type = string

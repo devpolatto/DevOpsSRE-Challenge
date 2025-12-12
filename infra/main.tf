@@ -76,20 +76,21 @@ resource "aws_iam_role_policy" "deploy" {
 }
 
 module "vpc" {
-  source = "./modules/vpc"
-
+  source           = "./modules/vpc"
+  enabled_resource = var.deploy_backend
   vpc = {
     name       = "${local.aws_prefix_name}-vpc"
     cidr_block = var.vpc.cidr_block
   }
+  count_elastic_ip = 1
   tags = {
     Environment = var.environment
   }
 }
 
 module "ecr" {
-  source = "./modules/ecr"
-
+  source           = "./modules/ecr"
+  enabled_resource = var.deploy_backend
   repository = {
     name                 = "${lower(replace(local.aws_prefix_name, "-", ""))}repository"
     image_tag_mutability = "IMMUTABLE"
@@ -100,127 +101,127 @@ module "ecr" {
   }
 }
 
-resource "aws_iam_role_policy" "ecs_deploy" {
-  name = "GitHubActions-ECS-Deploy-Policy-v2"
-  role = aws_iam_role.github_actions.id
+# resource "aws_iam_role_policy" "ecs_deploy" {
+#   name = "GitHubActions-ECS-Deploy-Policy-v2"
+#   role = aws_iam_role.github_actions.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ecr:CompleteLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:InitiateLayerUpload",
-          "ecr:BatchDeleteImage",
-          "ecr:PutImage",
-          "ecr:BatchCheckLayerAvailability"
-        ]
-        Resource = module.ecr.repository.repository_arn
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "ecr:GetAuthorizationToken"
-        ]
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "ecs:UpdateService"
-        ]
-        Resource = "arn:aws:ecs:*:${data.aws_caller_identity.current.account_id}:service/${local.aws_prefix_name}-cluster/${local.aws_prefix_name}-service"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "ecs:DescribeServices",
-          "ecs:DescribeTaskDefinition"
-        ]
-        Resource = "*"
-        Condition = {
-          StringEquals = {
-            "ecs:cluster" = "arn:aws:ecs:*:${data.aws_caller_identity.current.account_id}:cluster/${local.aws_prefix_name}-cluster"
-          }
-        }
-      }
-    ]
-  })
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "ecr:CompleteLayerUpload",
+#           "ecr:UploadLayerPart",
+#           "ecr:InitiateLayerUpload",
+#           "ecr:BatchDeleteImage",
+#           "ecr:PutImage",
+#           "ecr:BatchCheckLayerAvailability"
+#         ]
+#         Resource = module.ecr.repository.repository_arn
+#       },
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "ecr:GetAuthorizationToken"
+#         ]
+#         Resource = "*"
+#       },
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "ecs:UpdateService"
+#         ]
+#         Resource = "arn:aws:ecs:*:${data.aws_caller_identity.current.account_id}:service/${local.aws_prefix_name}-cluster/${local.aws_prefix_name}-service"
+#       },
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "ecs:DescribeServices",
+#           "ecs:DescribeTaskDefinition"
+#         ]
+#         Resource = "*"
+#         Condition = {
+#           StringEquals = {
+#             "ecs:cluster" = "arn:aws:ecs:*:${data.aws_caller_identity.current.account_id}:cluster/${local.aws_prefix_name}-cluster"
+#           }
+#         }
+#       }
+#     ]
+#   })
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
 
-resource "aws_iam_role" "github_actions_ecs" {
-  name = "GitHubActions-ECS-Deploy"
+# resource "aws_iam_role" "github_actions_ecs" {
+#   name = "GitHubActions-ECS-Deploy"
 
-  assume_role_policy = data.aws_iam_policy_document.github_assume.json
+#   assume_role_policy = data.aws_iam_policy_document.github_assume.json
 
-  tags = {
-    Purpose = "GitHub Actions OIDC para deploy ECS Fargate"
-  }
-}
+#   tags = {
+#     Purpose = "GitHub Actions OIDC para deploy ECS Fargate"
+#   }
+# }
 
-module "rds_aurora" {
-  source = "./modules/aurora"
+# module "rds_aurora" {
+#   source = "./modules/aurora"
 
-  aurora = {
-    name = "prodaurora"
-  }
-  write_cluster_instence = {
-    enabled = true
-  }
-  reader_cluster_instence = {
-    enabled = false
-  }
-  secret = {
-    secret_name = "${local.aws_prefix_name}-aurora-secret"
-  }
-  network = {
-    vpc_security_group_ids = [aws_security_group.aurora.id]
-    db_subnet_group_name   = aws_db_subnet_group.this.name
-  }
-  tags = {
-    Environment = var.environment
-  }
-}
+#   aurora = {
+#     name = "prodaurora"
+#   }
+#   write_cluster_instence = {
+#     enabled = true
+#   }
+#   reader_cluster_instence = {
+#     enabled = false
+#   }
+#   secret = {
+#     secret_name = "${local.aws_prefix_name}-aurora-secret"
+#   }
+#   network = {
+#     vpc_security_group_ids = [aws_security_group.aurora.id]
+#     db_subnet_group_name   = aws_db_subnet_group.this.name
+#   }
+#   tags = {
+#     Environment = var.environment
+#   }
+# }
 
-module "ecs" {
-  source = "./modules/ecs"
+# module "ecs" {
+#   source = "./modules/ecs"
 
-  ecr = {
-    repository_url = module.ecr.repository.uri
-  }
-  network = {
-    subnets                        = module.vpc.private_subnets.ids
-    security_groups                = [aws_security_group.fargate.id]
-    assign_public_ip               = false
-    load_balancer_target_group_arn = aws_lb_target_group.this.arn
-  }
-  task_definition = {
-    name           = "${local.aws_prefix_name}"
-    container_name = "backend"
-    container_port = 3000
-    cpu            = 512
-    memory         = 1024
-  }
-  environment_variables = [
-    {
-      name  = "NODE_ENV",
-      value = "production"
-    },
-    {
-      name  = "DATABASE_URL",
-      value = "${module.rds_aurora.rds_aurora.connection_secret_string_arn}:connectionString::"
-    }
-  ]
-  tags = {
-    Environment = var.environment
-  }
-}
+#   ecr = {
+#     repository_url = module.ecr.repository.uri
+#   }
+#   network = {
+#     subnets                        = module.vpc.private_subnets.ids
+#     security_groups                = [aws_security_group.fargate.id]
+#     assign_public_ip               = false
+#     load_balancer_target_group_arn = aws_lb_target_group.this.arn
+#   }
+#   task_definition = {
+#     name           = "${local.aws_prefix_name}"
+#     container_name = "backend"
+#     container_port = 3000
+#     cpu            = 512
+#     memory         = 1024
+#   }
+#   environment_variables = [
+#     {
+#       name  = "NODE_ENV",
+#       value = "production"
+#     },
+#     {
+#       name  = "DATABASE_URL",
+#       value = "${module.rds_aurora.rds_aurora.connection_secret_string_arn}:connectionString::"
+#     }
+#   ]
+#   tags = {
+#     Environment = var.environment
+#   }
+# }
 
 resource "github_actions_secret" "secrets" {
   for_each        = local.github_actions_secrets

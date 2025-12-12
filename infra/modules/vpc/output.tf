@@ -1,9 +1,9 @@
 output "vpc" {
   value = {
     name       = var.vpc.name
-    id         = aws_vpc.this.id
-    arn        = aws_vpc.this.arn
-    cidr_block = aws_vpc.this.cidr_block
+    id         = var.enabled_resource ? aws_vpc.this[0].id : ""
+    arn        = var.enabled_resource ? aws_vpc.this[0].arn : ""
+    cidr_block = var.enabled_resource ? aws_vpc.this[0].cidr_block : ""
   }
 }
 

@@ -6,6 +6,12 @@ variable "repository" {
   })
 }
 
+variable "enabled_resource" {
+  description = "Enable or disable the resource"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   type    = map(string)
   default = {}
